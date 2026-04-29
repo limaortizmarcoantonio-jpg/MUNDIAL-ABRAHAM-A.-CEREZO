@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mundial Abraham A. Cerezo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#1565c0; --blue2:#1976d2; --blue-l:#e3f2fd; --blue-ll:#f0f8ff;
+  --red:#e53935;  --red-l:#ffebee;
+  --gold:#f9a825; --gold-l:#fff8e1;
+  --green:#2e7d32;--green-l:#e8f5e9;
+  --teal:#00695c; --teal-l:#e0f2f1;
+  --bg:#f0f7ff;
+  --white:#fff;
+  --gray:#f5f7fa; --gray2:#eceff1;
+  --text:#1a237e; --text2:#37474f; --muted:#78909c;
+  --border:#cfd8dc;
+  --sh:0 2px 12px rgba(21,101,192,.12);
+  --sh-lg:0 6px 28px rgba(21,101,192,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(160deg,#dceefb 0%,#fce4ec 45%,#e8f5e9 100%);
+  min-height:100vh;color:var(--text2);
+}
+header{
+  background:linear-gradient(135deg,#0d47a1,#1565c0 50%,#1b5e20);
+  color:#fff;padding:42px 20px 38px;text-align:center;
+  position:relative;overflow:hidden;
+}
+header::before{
+  content:'';position:absolute;inset:0;opacity:.06;
+  background-image:radial-gradient(circle,#fff 1px,transparent 1px);
+  background-size:20px 20px;
+}
+header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,#f9a825,#e53935,#43a047,#1976d2,#f9a825);
+}
+.trophy{font-size:56px;display:block;margin-bottom:10px;
+  animation:bob .7s ease-in-out infinite alternate;}
+@keyframes bob{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+header h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(2rem,5vw,3.6rem);
+  letter-spacing:3px;text-shadow:0 2px 10px rgba(0,0,0,.3);
+  margin-bottom:6px;
+}
+header p{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.7);}
+
+/* BARRA ESTADO SYNC */
+#sync-bar{
+  background:#fff;text-align:center;padding:6px 16px;
+  font-size:12px;font-weight:700;letter-spacing:.5px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+#sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;}
+#sync-dot.ok{background:var(--green);}
+#sync-dot.error{background:var(--red);}
+#sync-dot.loading{background:var(--gold);animation:pl 1s ease infinite;}
+
+/* MODAL ADMIN */
+.modal-bg{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:999;align-items:center;justify-content:center;
+}
+.modal-bg.show{display:flex;}
+.modal{
+  background:#fff;border-radius:16px;padding:32px;
+  width:100%;max-width:360px;box-shadow:0 8px 40px rgba(0,0,0,.2);
+  text-align:center;
+}
+.modal h3{font-family:'Bebas Neue',sans-serif;font-size:24px;
+  color:var(--text);letter-spacing:1px;margin-bottom:6px;}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.modal input{
+  width:100%;padding:12px 16px;border:2px solid var(--border);
+  border-radius:10px;font-family:'Nunito',sans-serif;
+  font-size:16px;font-weight:700;text-align:center;
+  letter-spacing:4px;margin-bottom:12px;
+}
+.modal input:focus{outline:none;border-color:var(--blue2);}
+.modal-btns{display:flex;gap:8px;}
+.btn-ingresar{
+  flex:1;padding:12px;background:var(--blue);color:#fff;
+  border:none;border-radius:10px;font-family:'Nunito',sans-serif;
+  font-weight:900;font-size:15px;cursor:pointer;
+}
+.btn-ingresar:hover{background:var(--blue2);}
+.btn-cancelar{
+  padding:12px 18px;background:var(--gray);color:var(--muted);
+  border:none;border-radius:10px;font-family:'Nunito',sans-serif;
+  font-weight:800;font-size:15px;cursor:pointer;
+}
+.modal-error{color:var(--red);font-size:12px;font-weight:700;margin-bottom:8px;display:none;}
+
+nav{
+  background:#fff;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;
+  padding:10px 16px;position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 14px rgba(0,0,0,.1);
+  border-bottom:3px solid var(--gold);
+}
+.tab-btn{
+  padding:9px 20px;border:2px solid transparent;
+  background:var(--gray);color:var(--muted);
+  border-radius:8px;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;
+  transition:all .2s;display:flex;align-items:center;gap:5px;
+}
+.tab-btn:hover{background:var(--blue-l);color:var(--blue);border-color:var(--blue2);}
+.tab-btn.active{background:var(--blue);color:#fff;border-color:var(--blue);
+  box-shadow:0 3px 12px rgba(21,101,192,.35);}
+.btn-admin-nav{
+  background:linear-gradient(135deg,#f9a825,#f57f17)!important;
+  color:#fff!important;border-color:#f9a825!important;
+}
+.btn-admin-nav:hover{filter:brightness(1.08);}
+
+.container{max-width:1040px;margin:28px auto;padding:0 16px 60px;}
+.content{display:none;}
+.content.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.stitle{display:flex;align-items:center;gap:10px;margin:32px 0 14px;}
+.stitle:first-child{margin-top:0;}
+.stbar{width:5px;height:26px;border-radius:3px;
+  background:linear-gradient(to bottom,var(--blue),var(--red));}
+.stitle h2{font-family:'Bebas Neue',sans-serif;font-size:20px;
+  letter-spacing:1.5px;color:var(--text);}
+
+.j-card{background:#fff;border:1px solid var(--border);border-radius:14px;
+  margin-bottom:16px;overflow:hidden;box-shadow:var(--sh);transition:box-shadow .2s;}
+.j-card:hover{box-shadow:var(--sh-lg);}
+.j-header{
+  background:linear-gradient(90deg,var(--blue),var(--blue2));
+  padding:9px 20px;font-weight:800;font-size:13px;
+  letter-spacing:1.5px;text-transform:uppercase;color:#fff;
+  display:flex;align-items:center;gap:7px;
+}
+.j-header::before{content:'⚽';font-size:14px;}
+.partido{
+  display:grid;grid-template-columns:1fr 130px 1fr;
+  align-items:center;padding:12px 20px;
+  border-bottom:1px solid var(--gray2);transition:background .15s;
+}
+.partido:last-child{border-bottom:none;}
+.partido:hover{background:var(--blue-ll);}
+.eq-L{text-align:right;font-weight:700;font-size:14px;color:var(--text);}
+.eq-V{text-align:left;font-weight:700;font-size:14px;color:var(--text);}
+.score-box{display:flex;gap:6px;justify-content:center;align-items:center;}
+.score-box span{font-weight:900;font-size:16px;color:var(--muted);}
+
+/* Marcador solo lectura */
+.sc-ro{
+  width:52px;height:42px;text-align:center;
+  background:var(--gray2);border:2px solid var(--border);
+  border-radius:8px;color:var(--text2);
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;
+  display:flex;align-items:center;justify-content:center;
+  min-width:52px;
+}
+.sc-ro.vacio{color:var(--muted);font-size:14px;}
+
+/* Marcador editable */
+input.sc{
+  width:52px;height:42px;text-align:center;
+  background:var(--blue-l);border:2px solid var(--blue2);
+  border-radius:8px;color:var(--blue);
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;
+  transition:all .15s;
+}
+input.sc:focus{outline:none;border-color:var(--gold);background:#fff;
+  box-shadow:0 0 0 3px rgba(249,168,37,.22);}
+input.sc::-webkit-inner-spin-button{opacity:.3;}
+
+.tabla-wrap{background:#fff;border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;box-shadow:var(--sh);margin-top:4px;}
+.tabla-wrap table{width:100%;border-collapse:collapse;}
+.tabla-wrap thead th{
+  background:linear-gradient(90deg,var(--blue),var(--blue2));
+  color:#fff;padding:12px 8px;
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+}
+.tabla-wrap thead th:first-child{text-align:left;padding-left:16px;}
+.tabla-wrap tbody tr{border-bottom:1px solid var(--gray2);transition:background .15s;}
+.tabla-wrap tbody tr:last-child{border-bottom:none;}
+.tabla-wrap tbody tr:hover{background:var(--blue-l);}
+.tabla-wrap tbody td{padding:10px 8px;text-align:center;font-size:14px;}
+.tabla-wrap tbody td:first-child{text-align:left;padding-left:12px;font-weight:800;font-size:14px;color:var(--text);}
+.pts-v{font-weight:900;font-size:16px;color:var(--blue);}
+.pos-b{display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;font-weight:900;font-size:12px;
+  margin-right:4px;border:2px solid;}
+.p1{background:var(--gold-l);color:var(--gold);border-color:var(--gold);}
+.p2{background:var(--gray2);color:#546e7a;border-color:#90a4ae;}
+.p3{background:#fbe9e7;color:#bf360c;border-color:#ff7043;}
+
+.auto-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--green-l);border:1px solid #a5d6a7;
+  border-radius:20px;padding:5px 14px;
+  font-size:11px;font-weight:800;color:var(--green);
+  letter-spacing:.3px;margin-bottom:14px;
+}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--green);
+  display:inline-block;animation:pl 1.2s ease infinite;}
+@keyframes pl{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.6)}}
+
+.indiv-form{
+  background:#fff;border:1px solid var(--border);border-radius:14px;
+  padding:18px;margin-bottom:20px;box-shadow:var(--sh);
+  display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;
+}
+.igrp{display:flex;flex-direction:column;gap:4px;}
+.igrp label{font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--muted);}
+.igrp.grow{flex:1;min-width:180px;}
+.inp-wrap{position:relative;}
+input.ti{
+  width:100%;background:var(--gray);border:2px solid var(--border);
+  border-radius:8px;padding:11px 14px;
+  font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--text);
+  transition:all .15s;
+}
+input.ti:focus{outline:none;background:#fff;border-color:var(--blue2);
+  box-shadow:0 0 0 3px rgba(25,118,210,.14);}
+input.ti::placeholder{color:var(--muted);font-weight:400;}
+
+.ac{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#fff;border:2px solid var(--blue2);border-radius:10px;
+  box-shadow:0 8px 28px rgba(21,101,192,.18);
+  z-index:300;overflow:hidden;max-height:200px;overflow-y:auto;
+}
+.ac div{
+  padding:10px 14px;cursor:pointer;font-size:14px;font-weight:600;
+  border-bottom:1px solid var(--gray2);transition:background .12s;
+  display:flex;align-items:center;gap:7px;color:var(--text2);
+}
+.ac div:last-child{border-bottom:none;}
+.ac div::before{content:'👤';font-size:12px;}
+.ac div:hover,.ac div.sel{background:var(--blue-l);color:var(--blue);}
+.ac div em{font-style:normal;color:var(--red);font-weight:900;}
+
+input.ni{
+  width:110px;background:var(--gray);border:2px solid var(--border);
+  border-radius:8px;padding:11px;
+  font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;
+  color:var(--blue);text-align:center;transition:all .15s;
+}
+input.ni:focus{outline:none;background:#fff;border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(249,168,37,.2);}
+input.ni::placeholder{font-size:12px;color:var(--muted);font-weight:400;}
+.btn-add{
+  padding:11px 22px;
+  background:linear-gradient(135deg,var(--green),#43a047);
+  color:#fff;border:none;border-radius:8px;
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;
+  cursor:pointer;transition:filter .15s,transform .1s;white-space:nowrap;
+  box-shadow:0 3px 10px rgba(46,125,50,.28);
+}
+.btn-add:hover{filter:brightness(1.08);}
+.btn-add:active{transform:scale(.97);}
+
+.rank-wrap{background:#fff;border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;box-shadow:var(--sh);}
+.rank-wrap table{width:100%;border-collapse:collapse;}
+.rank-wrap thead th{
+  background:linear-gradient(90deg,var(--teal),#00897b);
+  color:#fff;padding:11px 14px;
+  font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+}
+.rank-wrap thead th:nth-child(2){text-align:left;}
+.rank-wrap tbody tr{border-bottom:1px solid var(--gray2);transition:background .15s;}
+.rank-wrap tbody tr:last-child{border-bottom:none;}
+.rank-wrap tbody tr:hover{background:var(--teal-l);}
+.rank-wrap tbody td{padding:11px 14px;text-align:center;font-size:14px;}
+.rank-wrap tbody td:nth-child(2){text-align:left;font-weight:700;}
+.poc{width:34px;height:34px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;
+  font-weight:900;font-size:14px;margin:0 auto;
+  border:2px solid var(--border);background:var(--gray2);color:var(--muted);}
+.poc-1{background:var(--gold-l);border-color:var(--gold);color:var(--gold);}
+.poc-2{background:#eceff1;border-color:#90a4ae;color:#546e7a;}
+.poc-3{background:#fbe9e7;border-color:#ff7043;color:#bf360c;}
+.vbig{font-weight:900;font-size:20px;}
+.vgol{color:var(--red);}.vpor{color:var(--teal);}
+.btn-del{
+  background:var(--red-l);border:1px solid #ef9a9a;color:var(--red);
+  border-radius:6px;padding:5px 11px;cursor:pointer;
+  font-weight:800;font-size:12px;transition:all .15s;
+}
+.btn-del:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
+.hint-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--gold-l);border:1px solid var(--gold);
+  border-radius:20px;padding:4px 12px;
+  font-size:11px;font-weight:800;color:#e65100;
+  letter-spacing:.3px;margin-bottom:14px;
+}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:14px;}
+.empty div{font-size:40px;margin-bottom:8px;}
+.btn-reset{
+  display:flex;align-items:center;gap:8px;
+  background:#fff;border:2px solid var(--red);color:var(--red);
+  padding:11px 26px;border-radius:50px;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;
+  margin:44px auto 0;transition:all .2s;
+  box-shadow:0 2px 8px rgba(229,57,53,.14);
+}
+.btn-reset:hover{background:var(--red);color:#fff;box-shadow:0 4px 16px rgba(229,57,53,.34);}
+
+/* Solo admin visible */
+.solo-admin{display:none !important;}
+body.admin-mode .solo-admin{display:flex !important;}
+body.admin-mode .solo-admin-inline{display:inline-flex !important;}
+.solo-admin-inline{display:none !important;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--gray);}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<!-- MODAL CONTRASEÑA ADMIN -->
+<div class="modal-bg" id="modalAdmin">
+  <div class="modal">
+    <div style="font-size:40px;margin-bottom:8px;">🔐</div>
+    <h3>Modo Administrador</h3>
+    <p>Ingresa la contraseña para editar resultados</p>
+    <div class="modal-error" id="modalError">Contraseña incorrecta</div>
+    <input type="password" id="passInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')verificarPass()">
+    <div class="modal-btns">
+      <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-ingresar" onclick="verificarPass()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <span class="trophy">🏆</span>
+  <h1>Mundial Abraham A. Cerezo</h1>
+  <p>Jornadas · Tablas automáticas · Goleadores · Porteros</p>
+</header>
+
+<div id="sync-bar">
+  <span id="sync-dot"></span>
+  <span id="sync-txt">Cargando datos...</span>
+</div>
+
+<nav>
+  <button class="tab-btn active" onclick="tab('res',this)">⚽ Jornadas</button>
+  <button class="tab-btn" onclick="tab('tab',this)">📊 Tablas</button>
+  <button class="tab-btn" onclick="tab('gol',this)">👟 Goleadores</button>
+  <button class="tab-btn" onclick="tab('por',this)">🧤 Portero Menos Vencido</button>
+  <button class="tab-btn btn-admin-nav" id="btnAdminNav" onclick="abrirModal()">🔑 Admin</button>
+  <button class="tab-btn solo-admin" id="btnSalirAdmin" onclick="salirAdmin()" style="background:var(--red-l);color:var(--red);border-color:var(--red);">✕ Salir de Admin</button>
+</nav>
+
+<div class="container">
+
+  <div id="res" class="content active">
+    <div class="stitle"><div class="stbar"></div><h2>Categoría Menor — 1ro a 3ro</h2></div>
+    <div id="cont-menor"></div>
+    <div class="stitle"><div class="stbar"></div><h2>Categoría Mayor — 4to a 6to</h2></div>
+    <div id="cont-mayor"></div>
+  </div>
+
+  <div id="tab" class="content">
+    <div class="auto-badge"><span class="pulse"></span> Se actualiza automáticamente con cada resultado</div>
+    <div class="stitle"><div class="stbar"></div><h2>Tabla Categoría Menor</h2></div>
+    <div class="tabla-wrap"><table>
+      <thead><tr><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DIF</th><th>PTS</th></tr></thead>
+      <tbody id="b-men"></tbody>
+    </table></div>
+    <div class="stitle"><div class="stbar"></div><h2>Tabla Categoría Mayor</h2></div>
+    <div class="tabla-wrap"><table>
+      <thead><tr><th>Equipo</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th><th>GF</th><th>GC</th><th>DIF</th><th>PTS</th></tr></thead>
+      <tbody id="b-may"></tbody>
+    </table></div>
+  </div>
+
+  <div id="gol" class="content">
+    <!-- GOLEADORES MENOR -->
+    <div class="stitle"><div class="stbar"></div><h2>Goleadores — Categoría Menor</h2></div>
+    <div class="hint-chip">✦ Autocompleta al escribir — suma goles si ya existe el jugador</div>
+    <div class="indiv-form solo-admin" id="form-gol-men">
+      <div class="igrp grow">
+        <label>Nombre del goleador</label>
+        <div class="inp-wrap">
+          <input class="ti" type="text" id="gn-men" placeholder="Escribe el nombre…"
+            autocomplete="off" oninput="showAC('golmen')" onkeydown="acKey(event,'golmen')">
+          <div class="ac" id="ac-golmen" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="igrp"><label>Goles</label>
+        <input class="ni" type="number" id="gc-men" placeholder="0" min="0"></div>
+      <div class="igrp"><label>&nbsp;</label>
+        <button class="btn-add" onclick="addInd('golmen')">＋ Añadir</button></div>
+    </div>
+    <div class="rank-wrap" id="wrap-golmen">
+      <div class="empty"><div>👟</div>Sin goleadores aún</div></div>
+
+    <!-- GOLEADORES MAYOR -->
+    <div class="stitle" style="margin-top:32px;"><div class="stbar"></div><h2>Goleadores — Categoría Mayor</h2></div>
+    <div class="hint-chip">✦ Autocompleta al escribir — suma goles si ya existe el jugador</div>
+    <div class="indiv-form solo-admin" id="form-gol-may">
+      <div class="igrp grow">
+        <label>Nombre del goleador</label>
+        <div class="inp-wrap">
+          <input class="ti" type="text" id="gn-may" placeholder="Escribe el nombre…"
+            autocomplete="off" oninput="showAC('golmay')" onkeydown="acKey(event,'golmay')">
+          <div class="ac" id="ac-golmay" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="igrp"><label>Goles</label>
+        <input class="ni" type="number" id="gc-may" placeholder="0" min="0"></div>
+      <div class="igrp"><label>&nbsp;</label>
+        <button class="btn-add" onclick="addInd('golmay')">＋ Añadir</button></div>
+    </div>
+    <div class="rank-wrap" id="wrap-golmay">
+      <div class="empty"><div>👟</div>Sin goleadores aún</div></div>
+  </div>
+
+  <div id="por" class="content">
+    <!-- PORTEROS MENOR -->
+    <div class="stitle"><div class="stbar"></div><h2>Portero Menos Vencido — Categoría Menor</h2></div>
+    <div class="hint-chip">✦ Autocompleta al escribir — suma goles si ya existe el portero</div>
+    <div class="indiv-form solo-admin" id="form-por-men">
+      <div class="igrp grow">
+        <label>Nombre del portero</label>
+        <div class="inp-wrap">
+          <input class="ti" type="text" id="pn-men" placeholder="Escribe el nombre…"
+            autocomplete="off" oninput="showAC('pormen')" onkeydown="acKey(event,'pormen')">
+          <div class="ac" id="ac-pormen" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="igrp"><label>Goles recibidos</label>
+        <input class="ni" type="number" id="pc-men" placeholder="0" min="0"></div>
+      <div class="igrp"><label>&nbsp;</label>
+        <button class="btn-add" onclick="addInd('pormen')">＋ Añadir</button></div>
+    </div>
+    <div class="rank-wrap" id="wrap-pormen">
+      <div class="empty"><div>🧤</div>Sin porteros aún</div></div>
+
+    <!-- PORTEROS MAYOR -->
+    <div class="stitle" style="margin-top:32px;"><div class="stbar"></div><h2>Portero Menos Vencido — Categoría Mayor</h2></div>
+    <div class="hint-chip">✦ Autocompleta al escribir — suma goles si ya existe el portero</div>
+    <div class="indiv-form solo-admin" id="form-por-may">
+      <div class="igrp grow">
+        <label>Nombre del portero</label>
+        <div class="inp-wrap">
+          <input class="ti" type="text" id="pn-may" placeholder="Escribe el nombre…"
+            autocomplete="off" oninput="showAC('pormay')" onkeydown="acKey(event,'pormay')">
+          <div class="ac" id="ac-pormay" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="igrp"><label>Goles recibidos</label>
+        <input class="ni" type="number" id="pc-may" placeholder="0" min="0"></div>
+      <div class="igrp"><label>&nbsp;</label>
+        <button class="btn-add" onclick="addInd('pormay')">＋ Añadir</button></div>
+    </div>
+    <div class="rank-wrap" id="wrap-pormay">
+      <div class="empty"><div>🧤</div>Sin porteros aún</div></div>
+  </div>
+
+  <button class="btn-reset solo-admin" onclick="hardReset()" style="display:none;">⚠️ Reiniciar todo el torneo</button>
+</div>
+
+<script>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────────
+const JSONBIN_KEY = '$2a$10$T34mdn9e1ggfjpPveRFfvOzs0hWkC/5psksE9Ag/JzC7AhkW4pOiG';
+const JSONBIN_BIN = '69e3e28736566621a8c99244'; // Contenedor fijo
+const ADMIN_PASS  = 'cerezo2025';  // ← CAMBIA ESTA CONTRASEÑA
+// ─────────────────────────────────────────────────────────────────
+
+let binId = '69e3e28736566621a8c99244';
+let db = {res:{}, golmen:[], golmay:[], pormen:[], pormay:[]};
+let esAdmin = false;
+
+const EQ_MEN=["1ro. A (Japón)","1ro. B (Ecuador)","2do. A (Canadá)","2do. B (Alemania)","3ro. A (Brasil)","3ro. B (Uruguay)"];
+const EQ_MAY=["4to. B (México)","4to. A (Portugal)","4to. C (España)","5to. A (Panamá)","5to. B (Francia)","6to. A (EE.UU.)","6to. B (Colombia)"];
+
+function fixture(eqs){
+  const es=eqs.length%2===0?[...eqs]:[...eqs,'BYE'];
+  const N=es.length, rondas=N-1, fix=[];
+  for(let r=0;r<rondas;r++){
+    const j=[];
+    for(let i=0;i<N/2;i++){
+      if(es[i]!=='BYE'&&es[N-1-i]!=='BYE') j.push([es[i],es[N-1-i]]);
+    }
+    fix.push(j);
+    es.splice(1,0,es.pop());
+  }
+  return fix;
+}
+const FIX_MEN=fixture(EQ_MEN);
+const FIX_MAY=fixture(EQ_MAY);
+
+// ─── JSONBIN API ─────────────────────────────────────────────────
+function setSyncStatus(estado, texto){
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-txt');
+  dot.className = estado;
+  txt.textContent = texto;
+}
+
+async function cargarDatos(){
+  setSyncStatus('loading','Cargando datos...');
+  try{
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`,{
+      headers:{'X-Master-Key': JSONBIN_KEY}
+    });
+    const data = await r.json();
+    db = data.record;
+    setSyncStatus('ok','Datos actualizados ✓');
+    renderTodo();
+  } catch(e){
+    setSyncStatus('error','Error al cargar datos');
+  }
+}
+
+async function crearBin(){
+  setSyncStatus('loading','Creando base de datos...');
+  try{
+    const r = await fetch('https://api.jsonbin.io/v3/b',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Master-Key': JSONBIN_KEY,
+        'X-Bin-Name':'mundial-cerezo',
+        'X-Bin-Private':'false'
+      },
+      body: JSON.stringify({res:{},gol:[],por:[]})
+    });
+    const data = await r.json();
+    binId = data.metadata.id;
+    localStorage.setItem('mundial_binId', binId);
+    db = {res:{},gol:[],por:[]};
+    setSyncStatus('ok','Base de datos lista ✓');
+    renderTodo();
+  } catch(e){
+    setSyncStatus('error','Error al crear base de datos');
+  }
+}
+
+async function guardarDatos(){
+  if(!binId) return;
+  setSyncStatus('loading','Guardando...');
+  try{
+    await fetch(`https://api.jsonbin.io/v3/b/${binId}`,{
+      method:'PUT',
+      headers:{
+        'Content-Type':'application/json',
+        'X-Master-Key': JSONBIN_KEY
+      },
+      body: JSON.stringify(db)
+    });
+    setSyncStatus('ok','Guardado ✓');
+  } catch(e){
+    setSyncStatus('error','Error al guardar');
+  }
+}
+
+// ─── ADMIN ───────────────────────────────────────────────────────
+function abrirModal(){
+  document.getElementById('modalAdmin').classList.add('show');
+  document.getElementById('passInput').value='';
+  document.getElementById('modalError').style.display='none';
+  setTimeout(()=>document.getElementById('passInput').focus(),100);
+}
+function cerrarModal(){
+  document.getElementById('modalAdmin').classList.remove('show');
+}
+function verificarPass(){
+  const v = document.getElementById('passInput').value;
+  if(v === ADMIN_PASS){
+    cerrarModal();
+    activarAdmin();
+  } else {
+    document.getElementById('modalError').style.display='block';
+    document.getElementById('passInput').value='';
+  }
+}
+function activarAdmin(){
+  esAdmin = true;
+  document.body.classList.add('admin-mode');
+  document.getElementById('btnAdminNav').style.display='none';
+  document.getElementById('btnSalirAdmin').style.display='flex';
+  renderTodo();
+}
+function salirAdmin(){
+  esAdmin = false;
+  document.body.classList.remove('admin-mode');
+  document.getElementById('btnAdminNav').style.display='flex';
+  document.getElementById('btnSalirAdmin').style.display='none';
+  renderTodo();
+}
+
+// ─── TABS ────────────────────────────────────────────────────────
+function tab(id,btn){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  hideAllAC();
+  if(id==='tab') calcTablas();
+}
+
+// ─── JORNADAS ────────────────────────────────────────────────────
+function renderJ(cid,fix,pref){
+  let h='';
+  fix.forEach((jornada,ji)=>{
+    h+=`<div class="j-card"><div class="j-header">Jornada ${ji+1}</div>`;
+    jornada.forEach((par,pi)=>{
+      const kL=`${pref}_j${ji}_p${pi}_L`, kV=`${pref}_j${ji}_p${pi}_V`;
+      const vL=db.res[kL]!==undefined?db.res[kL]:'';
+      const vV=db.res[kV]!==undefined?db.res[kV]:'';
+      if(esAdmin){
+        h+=`<div class="partido">
+          <div class="eq-L">${par[0]}</div>
+          <div class="score-box">
+            <input class="sc" type="number" min="0" value="${vL}" placeholder="—"
+              onchange="setRes('${kL}',this.value)">
+            <span>:</span>
+            <input class="sc" type="number" min="0" value="${vV}" placeholder="—"
+              onchange="setRes('${kV}',this.value)">
+          </div>
+          <div class="eq-V">${par[1]}</div>
+        </div>`;
+      } else {
+        const mL = vL!==''?vL:'—';
+        const mV = vV!==''?vV:'—';
+        const vaL = vL===''?'vacio':'';
+        const vaV = vV===''?'vacio':'';
+        h+=`<div class="partido">
+          <div class="eq-L">${par[0]}</div>
+          <div class="score-box">
+            <div class="sc-ro ${vaL}">${mL}</div>
+            <span>:</span>
+            <div class="sc-ro ${vaV}">${mV}</div>
+          </div>
+          <div class="eq-V">${par[1]}</div>
+        </div>`;
+      }
+    });
+    h+=`</div>`;
+  });
+  document.getElementById(cid).innerHTML=h;
+}
+
+async function setRes(k,v){
+  if(v===''||v===null){delete db.res[k];}
+  else{db.res[k]=parseInt(v)||0;}
+  calcTablas();
+  await guardarDatos();
+}
+
+// ─── TABLAS ──────────────────────────────────────────────────────
+function calcTablas(){
+  renderTabAuto('b-men',EQ_MEN,FIX_MEN,'mn');
+  renderTabAuto('b-may',EQ_MAY,FIX_MAY,'my');
+}
+
+function renderTabAuto(tbid,eqs,fix,pref){
+  const s={};
+  eqs.forEach(e=>s[e]={pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0});
+  fix.forEach((jornada,ji)=>{
+    jornada.forEach((par,pi)=>{
+      const kL=`${pref}_j${ji}_p${pi}_L`, kV=`${pref}_j${ji}_p${pi}_V`;
+      if(db.res[kL]===undefined||db.res[kV]===undefined) return;
+      const gL=parseInt(db.res[kL])||0, gV=parseInt(db.res[kV])||0;
+      const eL=par[0], eV=par[1];
+      s[eL].pj++;s[eV].pj++;
+      s[eL].gf+=gL;s[eL].gc+=gV;
+      s[eV].gf+=gV;s[eV].gc+=gL;
+      if(gL>gV){s[eL].pg++;s[eL].pts+=3;s[eV].pp++;}
+      else if(gL<gV){s[eV].pg++;s[eV].pts+=3;s[eL].pp++;}
+      else{s[eL].pe++;s[eL].pts+=1;s[eV].pe++;s[eV].pts+=1;}
+    });
+  });
+  const sorted=[...eqs].sort((a,b)=>{
+    if(s[b].pts!==s[a].pts) return s[b].pts-s[a].pts;
+    const da=s[a].gf-s[a].gc, db2=s[b].gf-s[b].gc;
+    if(db2!==da) return db2-da;
+    return s[b].gf-s[a].gf;
+  });
+  let h='';
+  sorted.forEach((e,i)=>{
+    const r=s[e], dg=r.gf-r.gc, pos=i+1;
+    const pc=pos===1?'p1':pos===2?'p2':pos===3?'p3':'';
+    const med=pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos;
+    const dgCol=dg>0?'color:var(--green)':dg<0?'color:var(--red)':'color:var(--muted)';
+    h+=`<tr>
+      <td><span class="pos-b ${pc}">${med}</span>${e}</td>
+      <td>${r.pj}</td><td>${r.pg}</td><td>${r.pe}</td><td>${r.pp}</td>
+      <td>${r.gf}</td><td>${r.gc}</td>
+      <td style="font-weight:800;${dgCol}">${dg>0?'+':''}${dg}</td>
+      <td><span class="pts-v">${r.pts}</span></td>
+    </tr>`;
+  });
+  document.getElementById(tbid).innerHTML=h;
+}
+
+// ─── AUTOCOMPLETE ────────────────────────────────────────────────
+let acIdx={golmen:-1,golmay:-1,pormen:-1,pormay:-1};
+
+function getInputIds(t){
+  if(t==='golmen') return {n:'gn-men', v:'gc-men'};
+  if(t==='golmay') return {n:'gn-may', v:'gc-may'};
+  if(t==='pormen') return {n:'pn-men', v:'pc-men'};
+  if(t==='pormay') return {n:'pn-may', v:'pc-may'};
+}
+
+const getNoms=t=>[...new Set(db[t].map(x=>x.n))].sort();
+
+function showAC(t){
+  const {n} = getInputIds(t);
+  const val=document.getElementById(n).value.trim();
+  const lst=document.getElementById('ac-'+t);
+  acIdx[t]=-1;
+  if(!val){lst.style.display='none';return;}
+  const m=getNoms(t).filter(x=>x.toLowerCase().includes(val.toLowerCase()));
+  if(!m.length){lst.style.display='none';return;}
+  const re=new RegExp(`(${val.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`,'gi');
+  lst.innerHTML=m.map(x=>`<div data-n="${x}" onmousedown="selAC('${t}','${x}')">${x.replace(re,'<em>$1</em>')}</div>`).join('');
+  lst.style.display='block';
+}
+function selAC(t,n){
+  const ids=getInputIds(t);
+  document.getElementById(ids.n).value=n;
+  hideAC(t);
+}
+function hideAC(t){document.getElementById('ac-'+t).style.display='none';acIdx[t]=-1;}
+function hideAllAC(){['golmen','golmay','pormen','pormay'].forEach(hideAC);}
+function acKey(e,t){
+  const lst=document.getElementById('ac-'+t);
+  const its=lst.querySelectorAll('div');
+  if(!its.length||lst.style.display==='none') return;
+  if(e.key==='ArrowDown'){e.preventDefault();acIdx[t]=Math.min(acIdx[t]+1,its.length-1);hAC(t,its);}
+  else if(e.key==='ArrowUp'){e.preventDefault();acIdx[t]=Math.max(acIdx[t]-1,0);hAC(t,its);}
+  else if(e.key==='Enter'&&acIdx[t]>=0){e.preventDefault();selAC(t,its[acIdx[t]].dataset.n);}
+  else if(e.key==='Escape') hideAC(t);
+}
+function hAC(t,its){
+  its.forEach((it,i)=>it.classList.toggle('sel',i===acIdx[t]));
+  if(acIdx[t]>=0) its[acIdx[t]].scrollIntoView({block:'nearest'});
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.inp-wrap')) hideAllAC();});
+
+// ─── INDIVIDUALES ────────────────────────────────────────────────
+async function addInd(t){
+  const ids=getInputIds(t);
+  const n=document.getElementById(ids.n).value.trim().toUpperCase();
+  const v=parseInt(document.getElementById(ids.v).value)||0;
+  if(!n) return;
+  if(!db[t]) db[t]=[];
+  const ex=db[t].find(x=>x.n===n);
+  if(ex){ex.v=(parseInt(ex.v)||0)+v;}
+  else{db[t].push({n,v});}
+  document.getElementById(ids.n).value='';
+  document.getElementById(ids.v).value='';
+  hideAC(t);
+  renderInd();
+  await guardarDatos();
+}
+async function delInd(t,i){
+  db[t].splice(i,1);
+  renderInd();
+  await guardarDatos();
+}
+
+function renderInd(){
+  ['golmen','golmay','pormen','pormay'].forEach(t=>{
+    const wrap=document.getElementById('wrap-'+t);
+    if(!wrap) return;
+    if(!db[t]) db[t]=[];
+    const esGol = t.startsWith('gol');
+    const data=[...db[t]].sort((a,b)=>{
+      const av=parseInt(a.v)||0,bv=parseInt(b.v)||0;
+      return esGol?bv-av:av-bv;
+    });
+    if(!data.length){
+      wrap.innerHTML=`<div class="empty"><div>${esGol?'👟':'🧤'}</div>Sin ${esGol?'goleadores':'porteros'} aún</div>`;
+      return;
+    }
+    const lbl=esGol?'Goles':'Goles Rec.';
+    const cls=esGol?'vgol':'vpor';
+    const accion = esAdmin ? `<th>Acción</th>` : '';
+    wrap.innerHTML=`<table>
+      <thead><tr><th>#</th><th style="text-align:left">Nombre</th><th>${lbl}</th>${accion}</tr></thead>
+      <tbody>${data.map((x,i)=>{
+        const oi=db[t].findIndex(d=>d.n===x.n);
+        const pc=i===0?'poc-1':i===1?'poc-2':i===2?'poc-3':'';
+        const med=i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1;
+        const btnDel = esAdmin ? `<td><button class="btn-del" onclick="delInd('${t}',${oi})">✕ Quitar</button></td>` : '';
+        return `<tr>
+          <td><div class="poc ${pc}">${med}</div></td>
+          <td>${x.n}</td>
+          <td><span class="vbig ${cls}">${x.v}</span></td>
+          ${btnDel}
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  });
+}
+
+async function hardReset(){
+  if(confirm('¿Borrar TODOS los datos del torneo? No se puede deshacer.')){
+    db={res:{},golmen:[],golmay:[],pormen:[],pormay:[]};
+    await guardarDatos();
+    renderTodo();
+  }
+}
+
+function renderTodo(){
+  renderJ('cont-menor',FIX_MEN,'mn');
+  renderJ('cont-mayor',FIX_MAY,'my');
+  calcTablas();
+  renderInd();
+}
+
+// ─── AUTO-REFRESH cada 30 seg para visitantes ────────────────────
+setInterval(()=>{ if(!esAdmin) cargarDatos(); }, 30000);
+
+// ─── INICIO ──────────────────────────────────────────────────────
+cargarDatos();
+</script>
+</body>
+</html>
